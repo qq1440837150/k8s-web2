@@ -4,9 +4,12 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.example.k8s_web.entiry.RunRecord;
+import com.example.k8s_web.repository.RunRecordRepository;
 import com.example.k8s_web.util.RestTemplateUtils;
 import com.example.k8s_web.vo.ApiResult;
 import com.example.k8s_web.vo.CompareForm;
+import com.example.k8s_web.vo.CompareRecordForm;
 import com.example.k8s_web.vo.TimeRangeForm;
 import io.kubernetes.client.PodLogs;
 import io.kubernetes.client.openapi.ApiException;
@@ -16,6 +19,7 @@ import io.kubernetes.client.openapi.models.V1PodList;
 import io.kubernetes.client.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
@@ -28,6 +32,9 @@ public class MetricController {
     @Autowired
     private CoreV1Api coreV1Api;
     String httpPrefix = "http://app5.gzucmrepair.top/api/v1/query_range";
+
+    @Autowired
+    private RunRecordRepository runRecordRepository;
     @GetMapping("/name")
     public ApiResult obtainMetrics(String name){
 //        String params = "query="+name+"&start=1679807362.703&end=1679810962.703&step=14";
@@ -240,7 +247,101 @@ public class MetricController {
         re.putOpt("legend",new JSONObject().putOnce("data",legend));
         return ApiResult.success(re);
     }
+    @PostMapping("/name/campareRecord")
+    public ApiResult obtainMetricsCompareRecord(@RequestBody CompareRecordForm compareRecordForm){
+//        String params = "query="+name+"&start=1679807362.703&end=1679810962.703&step=14";
 
+        RunRecord runRecord = runRecordRepository.findById(compareRecordForm.getRecordId1()).get();
+        if (runRecord == null|| StringUtils.isEmpty(runRecord.getMemRecord())) {
+            return ApiResult.error();
+        }
+        RunRecord runRecord2 = runRecordRepository.findById(compareRecordForm.getRecordId1()).get();
+        if (runRecord2 == null|| StringUtils.isEmpty(runRecord2.getMemRecord())) {
+            return ApiResult.error();
+        }
+        String text1 = null;
+        if (compareRecordForm.getType()==0) {
+            text1 = runRecord.getCpuRecord();
+        }else{
+            text1 = runRecord.getMemRecord();
+        }
+        String text2 = null;
+        if (compareRecordForm.getType()==0) {
+            text2 = runRecord2.getCpuRecord();
+        }else{
+            text2 = runRecord2.getMemRecord();
+        }
+        String http = text1;
+        JSONObject res = JSONUtil.parseObj(http);
+        JSONObject data = res.getJSONObject("data");
+        JSONArray result = data.getJSONArray("result");
+        JSONArray series = new JSONArray();
+        JSONArray legend = new JSONArray();
+        JSONArray xAxisData = new JSONArray();
+        for (int i = 0; i < result.size(); i++) {
+            JSONObject oneSeriey = new JSONObject();
+            oneSeriey.putOpt("type","line");
+            List<Object> finalValue  = new ArrayList<>();
+
+            JSONObject one = result.getJSONObject(i);
+            JSONObject metric = one.getJSONObject("metric");
+            String instance = metric.getStr("instance");
+//            System.out.println(instance);
+            legend.add(instance+"_task1");
+            JSONArray values = one.getJSONArray("values");
+            for (int j = 0; j < values.size(); j++) {
+                JSONArray temp = values.getJSONArray(j);
+                finalValue.add(temp.get(1));
+                if(i==0){
+//                    xAxisData.add(temp.get(0));
+                    xAxisData.add(j);// 改用下标
+                }
+//                for (int k = 0; k < temp.size(); k++) {
+//                    JSONArray jsonArray = temp.getJSONArray(k);
+//                    JSONObject oneValue = temp.getJSONArray(k).getJSONObject(1);
+//                    finalValue.add(oneValue);
+//                }
+//                finalValue.addAll(values.getJSONArray(j));
+            }
+//            System.out.println("sss");
+            oneSeriey.putOpt("data",finalValue);
+            oneSeriey.putOpt("name",instance+"_task1");
+            series.add(oneSeriey);
+        }
+
+        // 第二个任务
+        http = text2;
+        res = JSONUtil.parseObj(http);
+        data = res.getJSONObject("data");
+        result = data.getJSONArray("result");
+        for (int i = 0; i < result.size(); i++) {
+            JSONObject oneSeriey = new JSONObject();
+            oneSeriey.putOpt("type","line");
+            List<Object> finalValue  = new ArrayList<>();
+
+            JSONObject one = result.getJSONObject(i);
+            JSONObject metric = one.getJSONObject("metric");
+            String instance = metric.getStr("instance");
+//            System.out.println(instance);
+            legend.add(instance+"_task2");
+            JSONArray values = one.getJSONArray("values");
+            for (int j = 0; j < values.size(); j++) {
+                JSONArray temp = values.getJSONArray(j);
+                finalValue.add(temp.get(1));
+            }
+//            System.out.println("sss");
+            oneSeriey.putOpt("data",finalValue);
+            oneSeriey.putOpt("name",instance+"_task2");
+            series.add(oneSeriey);
+        }
+
+        JSONObject re = new JSONObject();
+        re.putOpt("series",series);
+        re.putOpt("xAxis",new JSONObject().putOnce("data",xAxisData));
+
+        re.putOpt("legend",new JSONObject().putOnce("data",legend));
+        return ApiResult.success(re);
+    }
     @PostMapping("/name/campare2")
     public ApiResult obtainMetricsCompare2(@RequestBody CompareForm compareForm){
 //        String params = "query="+name+"&start=1679807362.703&end=1679810962.703&step=14";
