@@ -255,7 +255,7 @@ public class MetricController {
         if (runRecord == null|| StringUtils.isEmpty(runRecord.getMemRecord())) {
             return ApiResult.error();
         }
-        RunRecord runRecord2 = runRecordRepository.findById(compareRecordForm.getRecordId1()).get();
+        RunRecord runRecord2 = runRecordRepository.findById(compareRecordForm.getRecordId2()).get();
         if (runRecord2 == null|| StringUtils.isEmpty(runRecord2.getMemRecord())) {
             return ApiResult.error();
         }
@@ -306,6 +306,8 @@ public class MetricController {
 //            System.out.println("sss");
             oneSeriey.putOpt("data",finalValue);
             oneSeriey.putOpt("name",instance+"_task1");
+            // 不显示数据点
+            oneSeriey.putOpt("symbol","none");
             series.add(oneSeriey);
         }
 
@@ -332,6 +334,11 @@ public class MetricController {
 //            System.out.println("sss");
             oneSeriey.putOpt("data",finalValue);
             oneSeriey.putOpt("name",instance+"_task2");
+            // 设置虚线
+            oneSeriey.putOpt("itemStyle",new JSONObject()
+                    .putOnce("normal",new JSONObject().putOnce("lineStyle",
+                            new JSONObject().putOnce("type","dotted"))));
+            oneSeriey.putOpt("symbol","none");
             series.add(oneSeriey);
         }
 
@@ -340,6 +347,7 @@ public class MetricController {
         re.putOpt("xAxis",new JSONObject().putOnce("data",xAxisData));
 
         re.putOpt("legend",new JSONObject().putOnce("data",legend));
+//        re.putOpt("tooltips",new JSONObject().putOnce("trigger","axis"));
         return ApiResult.success(re);
     }
     @PostMapping("/name/campare2")
@@ -461,7 +469,9 @@ public class MetricController {
     public ApiResult clearAll() throws ApiException {
 
 
-//        String http = HttpUtil.post("http://app5.gzucmrepair.top/api/v1/admin/tsdb/delete_series?match[]=cpu_usage_active",new HashMap<>());
+       HttpUtil.post("http://app5.gzucmrepair.top/api/v1/admin/tsdb/delete_series?match[]=cpu_usage_active",new HashMap<>());
+        HttpUtil.post("http://app5.gzucmrepair.top/api/v1/admin/tsdb/delete_series?match[]=mem_usage_active",new HashMap<>());
+
         String post = HttpUtil.post("http://app5.gzucmrepair.top/api/v1/admin/tsdb/delete_series?match[]=cpu_usage_avg_5m", new HashMap<>());
         System.out.println(post);
 

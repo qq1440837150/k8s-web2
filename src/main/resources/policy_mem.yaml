@@ -6,16 +6,17 @@ spec:
     - name: cpu_usage_avg_5m
       period: 3m
     - name: cpu_usage_max_avg_1h
-      period: 15m
+      period: 3m
     - name: cpu_usage_max_avg_1d
-      period: 3h
+      period: 3m
     ##memory usage
     - name: mem_usage_avg_5m
       period: 3m
     - name: mem_usage_max_avg_1h
-      period: 15m
+      period: 3m
     - name: mem_usage_max_avg_1d
-      period: 3h
+      period: 3m
+
 
   predicate:
     ##cpu usage
@@ -32,19 +33,13 @@ spec:
   priority:
     ###score = sum(() * weight) / len,  0 <= score <= 10
     ##memory usage
-    - name: cpu_usage_avg_5m
-      weight: 0.2
-    - name: cpu_usage_max_avg_1h
-      weight: 0.3
-    - name: cpu_usage_max_avg_1d
-      weight: 0.5
     ##memory usage
     - name: mem_usage_avg_5m
-      weight: 0.2
+      weight: 0.8
     - name: mem_usage_max_avg_1h
-      weight: 0.3
+      weight: 0.1
     - name: mem_usage_max_avg_1d
-      weight: 0.5
+      weight: 0.1
 
   hotValue:
     - timeRange: 5m
