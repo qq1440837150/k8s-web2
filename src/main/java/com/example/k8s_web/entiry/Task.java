@@ -18,5 +18,7 @@ public class Task {
     @Column(name = "timeInterval")
     private Integer interval;
     private Integer scheduler;
+    private String codeContent;
+    private Integer type;
 
 }

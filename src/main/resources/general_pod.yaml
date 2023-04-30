@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: memtest
+  name: memtest1
+  namespace: default
+spec:
+  containers:
+    - command:
+        - java
+        - -jar
+        - -Xmx1324m
+        - -Xms512m
+        - /root/entrance.jar
+      image: zhf5201314/general:v1.0.2
+      imagePullPolicy: IfNotPresent
+      name: memtest
+      volumeMounts:
+        - name: java-module
+          mountPath: /root/data/
+  volumes:
+    - name: java-module
+      configMap:
+        name: java-module

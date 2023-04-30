@@ -344,10 +344,29 @@ public class MetricController {
 
         JSONObject re = new JSONObject();
         re.putOpt("series",series);
-        re.putOpt("xAxis",new JSONObject().putOnce("data",xAxisData));
-
+        re.putOpt("xAxis",new JSONObject().putOnce("data",xAxisData)
+                .putOnce("name","时间点")
+                .putOnce("nameLocation","center")
+                .putOnce("nameGap",50));
+        re.putOpt("yAxis",new JSONObject()
+                .putOnce("name","负载率")
+                .putOnce("nameLocation","center")
+                .putOnce("nameGap",50));
         re.putOpt("legend",new JSONObject().putOnce("data",legend));
-//        re.putOpt("tooltips",new JSONObject().putOnce("trigger","axis"));
+//        re.putOpt("scales",new JSONObject().
+//                putOnce("xAxes",new JSONObject().
+//                        putOnce("display",true).
+//                        putOnce("title",new JSONObject()
+//                                .putOnce("display",true)
+//                                .putOnce("text","时间点")
+//                        )
+//                ).
+//                putOnce("yAxes",new JSONObject().
+//                        putOnce("display",true).
+//                        putOnce("title",new JSONObject()
+//                                .putOnce("display",true)
+//                                .putOnce("text","负载率")
+//                        )));
         return ApiResult.success(re);
     }
     @PostMapping("/name/campare2")

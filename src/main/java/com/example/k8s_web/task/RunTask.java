@@ -11,17 +11,13 @@ import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
-import io.kubernetes.client.openapi.models.V1Container;
-import io.kubernetes.client.openapi.models.V1Pod;
+import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Yaml;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class RunTask implements Runnable{
     String httpPrefix = "http://app5.gzucmrepair.top/api/v1/query_range";
@@ -71,22 +67,58 @@ public class RunTask implements Runnable{
             Configuration.setDefaultApiClient(client);
             CoreV1Api api = new CoreV1Api();
 
-            File file = new File("E:\\java\\k8s-web\\k8s-web\\k8s-web\\src\\main\\resources\\cputest_pod.yaml");
             V1Pod load = null;
-            try {
-                load = (V1Pod) Yaml.load(file);
-                load.getMetadata().putLabelsItem("app",task.getPodName());
-                // 设置调度器
-                if (task.getScheduler()==1) {
-                    load.getSpec().setSchedulerName("crane-scheduler");
-                }else {
+            if(task.getType()==null && task.getType()==0){
+                try {
+                    File file = new File("E:\\java\\k8s-web\\k8s-web\\k8s-web\\src\\main\\resources\\cputest_pod.yaml");
+                    load = (V1Pod) Yaml.load(file);
+                    load.getMetadata().putLabelsItem("app",task.getPodName());
+                    // 设置调度器
+                    if (task.getScheduler()==1) {
+                        load.getSpec().setSchedulerName("crane-scheduler");
+                    }else {
 //                    load.getSpec().setSchedulerName("default");
-                    load.getSpec().setSchedulerName(null);
+                        load.getSpec().setSchedulerName(null);
+                    }
+                    List<V1Container> containers = load.getSpec().getContainers();
+                    containers.get(0).setImage(task.getContainer());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                List<V1Container> containers = load.getSpec().getContainers();
-                containers.get(0).setImage(task.getContainer());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            }else{
+                try {
+
+                    V1ConfigMapBuilder builder = new V1ConfigMapBuilder();
+                    HashMap<String, String> data = new HashMap<>();
+                    data.put("TestMain.java",task.getCodeContent());
+                    V1ConfigMap build = builder.withApiVersion("v1")
+                            .withKind("ConfigMap")
+                            .withNewMetadata().withName(task.getName() + "data").endMetadata()
+                            .withData(data)
+                            .build();
+
+                    api.createNamespacedConfigMap("default",build,null,null,null  );
+                    File file = new File("E:\\java\\k8s-web\\k8s-web\\k8s-web\\src\\main\\resources\\general_pod.yaml");
+                    load = (V1Pod) Yaml.load(file);
+                    load.getMetadata().putLabelsItem("app",task.getPodName());
+                    List<V1Volume> volumes = load.getSpec().getVolumes();
+                    V1Volume v1Volume = volumes.get(0);
+                    V1ConfigMapVolumeSource v1ConfigMapVolumeSource = new V1ConfigMapVolumeSource();
+                    v1ConfigMapVolumeSource.setName(task.getName()+"data");
+                    v1Volume.setConfigMap(v1ConfigMapVolumeSource);
+
+                    // 设置调度器
+                    if (task.getScheduler()==1) {
+                        load.getSpec().setSchedulerName("crane-scheduler");
+                    }else {
+//                    load.getSpec().setSchedulerName("default");
+                        load.getSpec().setSchedulerName(null);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ApiException e) {
+                    throw new RuntimeException(e);
+                }
             }
             System.out.println("开始时间："+ new Date());
             Date startTime = new Date();
@@ -99,6 +131,7 @@ public class RunTask implements Runnable{
 
                     String name = task.getPodName()+ "-"+count;
                     podName.add(name);
+                    V1ObjectMeta metadata = load.getMetadata();
                     load.getMetadata().setName(name);
                     api.createNamespacedPod("default",
                             load, null, null, null);
@@ -166,4 +199,11 @@ public class RunTask implements Runnable{
         String http = RestTemplateUtils.getHttp(httpPrefix, jsonObject);
         return http;
     }
+
+    public static void main(String[] args) throws IOException {
+        File file = new File("E:\\java\\k8s-web\\k8s-web\\k8s-web\\src\\main\\resources\\general_pod.yaml");
+        Object load = Yaml.load(file);
+        System.out.println(load);
+    }
 }
+

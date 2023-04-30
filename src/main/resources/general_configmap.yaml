@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: java-module
+  namespace: default
+data:
+  TestMain.java: |
+    public class TestMain {
+      public static void main(String[] args) throws InterruptedException {
+        System.out.println("hello world");
+        Thread.sleep(1000*60);
+      }
+    }
