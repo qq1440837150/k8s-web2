@@ -4,9 +4,9 @@ server:
     context-path: /api
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/lover?serverTimezone=GMT%2B8
+    url: jdbc:mysql://gz-cynosdbmysql-grp-q0u8k5ub.sql.tencentcdb.com:20559/lover?serverTimezone=GMT%2B8
     username: root
-    password: Zhf5201314..
+    password: zhf5201314..
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -20,3 +20,7 @@ my:
   config:
     savePath: E:/picture4
     httpPrefix: https://touxiang.jinriyunqi.com/api
+
+app:
+  config:
+    kubernetes-api: ${PROMETHEUS_API:http://prometheus-k8s:9090}

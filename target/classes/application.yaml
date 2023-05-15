@@ -18,3 +18,4 @@ server:
     session:
       timeout: 3600
 # JACKSON (JacksonProperties)
+

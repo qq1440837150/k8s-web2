@@ -19,3 +19,7 @@ my:
   config:
     savePath: E:/picture4
     httpPrefix: https://touxiang.gzucmrepair.top/api
+
+app:
+  config:
+    kubernetes-api: ${PROMETHEUS_API:http://app5.gzucmrepair.top}

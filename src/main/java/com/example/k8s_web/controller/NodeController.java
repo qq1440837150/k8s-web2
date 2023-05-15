@@ -1,6 +1,9 @@
 package com.example.k8s_web.controller;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.example.k8s_web.util.RestTemplateUtils;
 import com.example.k8s_web.vo.ApiResult;
 import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.ApiClient;
@@ -10,10 +13,12 @@ import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.Config;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -24,6 +29,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/node")
 public class NodeController {
+    String httpPrefix = "/api/v1/query";
+    @Value("${app.config.kubernetes-api}")
+    private String kubernetesAPI;
+    @PostConstruct
+    public void init(){
+        httpPrefix = kubernetesAPI +httpPrefix;
+    }
     @Autowired
     private CoreV1Api coreV1Api;
     @GetMapping("/list")
@@ -42,6 +54,60 @@ public class NodeController {
     }
     @GetMapping("/computeResource")
     public ApiResult computeResource(String name) throws IOException, ApiException {
+        HashMap<Object, Object> res = new HashMap<>();
+        computeResource(name, res);
+        return ApiResult.success(res);
+    }
+    @GetMapping("/computeRealResource")
+    public ApiResult computeRealResource() throws ApiException {
+        HashMap<String, String> cpuValue = new HashMap<>();
+        HashMap<String, String> memValue = new HashMap<>();
+        long current = System.currentTimeMillis();
+        obtainRealResource(cpuValue, "cpu_usage_active", (double) current);
+        obtainRealResource(memValue, "mem_usage_active", (double) current);
+        // 获取总容量
+        V1NodeList nodeList = this.coreV1Api.listNode(null, null, null, null, null, null, null
+                , null, null, null);
+        List<V1Node> items = nodeList.getItems();
+        HashMap<String, Object> capacitys = new HashMap<>();
+        for (int i = 0; i < items.size(); i++) {
+            V1Node v1Node = items.get(i);
+            Map<String, Quantity> capacity = v1Node.getStatus().getCapacity();
+            capacitys.put(v1Node.getMetadata().getName(),capacity);
+        }
+        // 返回值
+        HashMap<String, Object> res = new HashMap<>();
+        res.put("cpu",cpuValue);
+        res.put("mem",memValue);
+        res.put("capacitys",capacitys);
+
+        return ApiResult.success(res);
+    }
+
+    private void obtainRealResource(HashMap<String, String> cpuValue, String metricStr, double current) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.putOpt("query", metricStr);
+        jsonObject.putOpt("time",String.format("%.3f", current /1000));
+        String http = RestTemplateUtils.getHttp(httpPrefix, jsonObject);
+        JSONObject res = JSONUtil.parseObj(http);
+        JSONObject data = res.getJSONObject("data");
+        JSONArray result = data.getJSONArray("result");
+        for (int i = 0; i < result.size(); i++) {
+            JSONObject metric = result.getJSONObject(i);
+            JSONArray value = metric.getJSONArray("value");
+            String str = value.getStr(1);
+            JSONObject metricInfo = metric.getJSONObject("metric");
+            String instance = metricInfo.getStr("instance");
+            cpuValue.put(instance,str);
+        }
+
+    }
+
+    private void computeRealResource(String name, HashMap<Object, Object> res) {
+
+    }
+
+    private void computeResource(String name, HashMap<Object, Object> res) throws ApiException {
         BigDecimal requestCpu = new BigDecimal(0);
         BigDecimal requestMem = new BigDecimal(0);
         BigDecimal limitCpu = new BigDecimal(0);
@@ -75,13 +141,12 @@ public class NodeController {
         requestMem = requestMem.divide(new BigDecimal(1024*1024));
         limitMem = limitMem.divide(new BigDecimal(1024*1024));
 
-        HashMap<Object, Object> res = new HashMap<>();
         res.put("requestCpu",requestCpu.toString());
         res.put("requestMem",requestMem.toString());
         res.put("limitCpu",limitCpu.toString());
         res.put("limitMem",limitMem.toString());
-        return ApiResult.success(res);
     }
+
     @GetMapping("/podCount")
     public ApiResult podCount() throws IOException, ApiException {
         V1NodeList nodeList = coreV1Api.listNode(null,null,null,null,

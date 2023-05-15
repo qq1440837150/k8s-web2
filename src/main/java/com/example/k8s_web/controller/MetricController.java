@@ -18,10 +18,12 @@ import io.kubernetes.client.openapi.models.V1Pod;
 import io.kubernetes.client.openapi.models.V1PodList;
 import io.kubernetes.client.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,12 +33,20 @@ import java.util.stream.Collectors;
 public class MetricController {
     @Autowired
     private CoreV1Api coreV1Api;
-    String httpPrefix = "http://app5.gzucmrepair.top/api/v1/query_range";
+    @Value("${app.config.kubernetes-api}")
+    private String kubernetesAPI;
+
+    String httpPrefix = "/api/v1/query_range";
 
     @Autowired
     private RunRecordRepository runRecordRepository;
+    @PostConstruct
+    public void init(){
+        httpPrefix = kubernetesAPI +httpPrefix;
+    }
     @GetMapping("/name")
     public ApiResult obtainMetrics(String name){
+
 //        String params = "query="+name+"&start=1679807362.703&end=1679810962.703&step=14";
         long current = System.currentTimeMillis();
         long lasteOneHour = current-1000*60*60;

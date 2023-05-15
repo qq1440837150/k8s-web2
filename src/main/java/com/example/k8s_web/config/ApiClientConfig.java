@@ -12,6 +12,7 @@ import java.io.IOException;
 public class ApiClientConfig {
     @Bean
     public CoreV1Api apiClient() throws IOException {
+        Config.defaultClient();
         ApiClient client = Config.defaultClient().setVerifyingSsl(false);
         io.kubernetes.client.openapi.Configuration.setDefaultApiClient(client);
         CoreV1Api api = new CoreV1Api();
