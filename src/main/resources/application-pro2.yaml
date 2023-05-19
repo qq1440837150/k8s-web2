@@ -1,0 +1,26 @@
+server:
+  port: 8093
+  servlet:
+    context-path: /api
+spring:
+  datasource:
+    url: xxx
+    username: root
+    password: xxx
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+my:
+  config:
+    savePath: E:/picture4
+    httpPrefix: https://touxiang.jinriyunqi.com/api
+
+app:
+  config:
+    kubernetes-api: ${PROMETHEUS_API:http://prometheus-k8s:9090}
