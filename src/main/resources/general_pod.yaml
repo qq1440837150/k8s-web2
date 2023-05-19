@@ -13,7 +13,7 @@ spec:
         - -Xmx1324m
         - -Xms512m
         - /root/entrance.jar
-      image: zhf5201314/general:v1.0.2
+      image: zhf5201314/general:v1.0.5
       imagePullPolicy: IfNotPresent
       name: memtest
       volumeMounts:

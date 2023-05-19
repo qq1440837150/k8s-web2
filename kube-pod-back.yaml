@@ -6,15 +6,19 @@ metadata:
   name: k8s-web-back
   namespace: default
 spec:
+  serviceAccountName: k8sweb
   containers:
     - command:
         - java
         - -jar
         - /app.jar
         - --spring.profiles.active=pro
-      image: zhf5201314/k8s-web-backen
+      image: zhf5201314/k8s-web-backen:v1.0.6
       imagePullPolicy: IfNotPresent
       name: k8s-web-backen
       ports:
         - containerPort: 8093
           name: http
+      env:
+        - name: PROMETHEUS_API
+          value: http://prometheus-k8s.monitoring:9090

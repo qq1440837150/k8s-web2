@@ -112,14 +112,33 @@
         <dependency>
             <groupId>io.kubernetes</groupId>
             <artifactId>client-java</artifactId>
-            <version>12.0.0</version>
+            <version>15.0.1</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.yaml</groupId>-->
+<!--            <artifactId>snakeyaml</artifactId>-->
+<!--            <version>1.33</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>io.kubernetes</groupId>
+            <artifactId>client-java-api</artifactId>
+            <version>15.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.26</version>
+            <groupId>io.kubernetes</groupId>
+            <artifactId>client-java-extended</artifactId>
+            <version>15.0.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.kubernetes</groupId>
+            <artifactId>client-java-spring-integration</artifactId>
+            <version>15.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kubernetes</groupId>
+            <artifactId>client-java-proto</artifactId>
+            <version>15.0.1</version>
+        </dependency>
         <!-- The client -->
         <dependency>
             <groupId>io.prometheus</groupId>

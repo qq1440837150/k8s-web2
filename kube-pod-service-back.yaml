@@ -12,7 +12,7 @@ spec:
         - -jar
         - /app.jar
         - --spring.profiles.active=pro
-      image: zhf5201314/k8s-web-backen:v1.0.1
+      image: zhf5201314/k8s-web-backen:v1.0.2
       imagePullPolicy: IfNotPresent
       name: k8s-web-backen
       ports:

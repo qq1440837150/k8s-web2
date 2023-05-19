@@ -36,7 +36,7 @@ class PodControllerTest {
             V1ConfigMap v1ConfigMap = v1ConfigMapList.getItems().get(0);
             v1ConfigMap.getData().put("policy.yaml",content);
             coreV1Api.replaceNamespacedConfigMap(v1ConfigMap.getMetadata().getName(),v1ConfigMap.getMetadata().getNamespace()
-            ,v1ConfigMap,null,null,null);
+            ,v1ConfigMap,null,null,null,null);
         }
     }
 }

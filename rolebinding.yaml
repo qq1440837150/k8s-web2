@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+# 此角色绑定，使得用户 "jane" 能够读取 "default" 命名空间中的 Pods
+kind: RoleBinding
+metadata:
+  name: allRightRoleBinding
+  namespace: default
+subjects:
+  - kind: User
+    name: k8sweb # 名称大小写敏感
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role #this must be Role or ClusterRole
+  name: allRightRole # 这里的名称必须与你想要绑定的 Role 或 ClusterRole 名称一致
+  apiGroup: rbac.authorization.k8s.io
