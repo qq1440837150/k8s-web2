@@ -73,10 +73,17 @@ public class TaskController {
         taskRepository.save(task);
         return ApiResult.success();
     }
+
     @DeleteMapping("/delete")
     @Transactional
     public ApiResult deleteTask(Long id){
         taskRepository.deleteById(id);
         return ApiResult.success();
+    }
+    @GetMapping("/one")
+    public ApiResult ontainOne(Long id){
+        Optional<Task> byId = taskRepository.findById(id);
+
+        return ApiResult.success(byId.get());
     }
 }
