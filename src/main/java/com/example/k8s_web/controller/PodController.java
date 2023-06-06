@@ -48,6 +48,22 @@ public class PodController {
             response.getOutputStream().flush();
         }
     }
+    @GetMapping("/logs/range")
+    public void logInfo2(String name, Long lines, Boolean reverse, HttpServletResponse response) throws IOException, ApiException {
+        String fieldSelector = "metadata.name="+name;
+        PodLogs logs = new PodLogs();
+        if (reverse == null) {
+            reverse = true;
+        }
+        V1PodList list = coreV1Api.listPodForAllNamespaces(true,null, fieldSelector, null, null, null, null, null, null, null);
+        List<V1Pod> items = list.getItems();
+        if (items.size()>0) {
+            V1Pod v1Pod = items.get(0);
+            InputStream is = logs.streamNamespacedPodLog(v1Pod);
+            Streams.copy(is, System.out);
+            response.getOutputStream().flush();
+        }
+    }
     @GetMapping("/delete")
     public ApiResult delete(String name, HttpServletResponse response) throws IOException, ApiException {
         String fieldSelector = "metadata.name="+name;
