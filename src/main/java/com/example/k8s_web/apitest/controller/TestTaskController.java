@@ -19,6 +19,25 @@ public class TestTaskController {
     }
 
     /**
+     * 删除一个任务
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/delete")
+    public ApiResult deleteOneTask(Long id){
+        return null;
+    }
+
+    /**
+     * 更新一个测试任务
+     * @param testTaskDto
+     * @return
+     */
+    @PutMapping("/updateTask")
+    public ApiResult updateTask(@RequestBody TestTaskDto testTaskDto){
+        return null;
+    }
+    /**
      * 获取测试任务列表
      * @return
      */
