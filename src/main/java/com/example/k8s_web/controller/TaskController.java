@@ -28,6 +28,7 @@ public class TaskController {
         Page<Task> all = this.taskRepository.findAll(pageRequest);
         return ApiResult.success(all);
     }
+    // todo: 存在并发问题，由于是后台管理的任务，所以暂时忽略
     @GetMapping("/start")
     public ApiResult startTask(Long id){
         // 1. 查询是否有任务启动，默认只能启动一个任务
