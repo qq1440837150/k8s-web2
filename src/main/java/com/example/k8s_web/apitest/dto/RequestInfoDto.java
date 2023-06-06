@@ -8,8 +8,9 @@ import java.util.Map;
 @Data
 public class RequestInfoDto {
     private Long id;
-    private Long  method;
-    private Map<String,String> params;
-    private Map<String,String> data;
-    private String respectResponse;
+    private Integer  method;
+    private String path;
+    private Map<String,Object> params;
+    private Map<String,Object> data;
+    private String expectResponse;
 }
