@@ -18,4 +18,5 @@ public class TestTask {
     private Integer totalRequestNums;
     private Integer totalThreadNums;
     private Long requestInfoId;
+    private Integer status;
 }

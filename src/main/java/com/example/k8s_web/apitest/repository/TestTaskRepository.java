@@ -19,4 +19,6 @@ public interface TestTaskRepository extends JpaRepository<TestTask, Long> {
     @Query(value = "select tt.id,tt.requestInfoId,tt.generateTime,tt.totalRequestNums,tt.totalThreadNums ,ri.data,ri.expectResponse,ri.method,ri.params,ri.path " +
             "from TestTask tt left JOIN  RequestInfo ri on tt.requestInfoId = ri.id where tt.id=:id")
     FullTaskInfoDto findAllInfoById(@Param("id")Long id);
+
+    boolean existsByStatusEquals(Integer status);
 }

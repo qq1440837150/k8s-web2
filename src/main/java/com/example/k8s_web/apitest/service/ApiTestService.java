@@ -9,4 +9,6 @@ public interface ApiTestService {
     Boolean assertEquals(RequestInfoDto requestInfoDto);
 
     void startOneTest(TestTaskDto testTaskDto);
+
+    void stopTask(Long taskId);
 }
